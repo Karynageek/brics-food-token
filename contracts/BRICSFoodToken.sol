@@ -62,11 +62,13 @@ contract BRICSFoodToken is ERC20, ERC20Burnable, AccessControl {
         address admin_,
         address minter_
     ) ERC20(name_, symbol_) {
-        if (tokenContractAddresses.length != paymentAmounts.length) {
+        uint256 dataLength = tokenContractAddresses.length;
+
+        if (dataLength != paymentAmounts.length) {
             revert DataLengthsNotMatch();
         }
 
-        for (uint256 i = 0; i < tokenContractAddresses.length; i++) {
+        for (uint256 i = 0; i < dataLength; i++) {
             tokenPaymentAmounts[tokenContractAddresses[i]] = paymentAmounts[i];
         }
 
