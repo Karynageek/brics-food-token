@@ -38,7 +38,7 @@ contract BRICSFoodToken is ERC20, ERC20Burnable, AccessControl {
         address _paymentToken,
         uint256 _price
     );
-    event SaleStopped();
+    event SaleStopped(bool _enabled);
 
     /**
      * @dev Initializes the contract.
@@ -173,15 +173,15 @@ contract BRICSFoodToken is ERC20, ERC20Burnable, AccessControl {
     }
 
     /**
-     * @notice Stops the sale of tokens.
+     * @notice Stops/starts the sale of tokens.
      *
-     * @dev Sets the `saleStopped` flag to true.
+     * @dev Sets the `saleStopped` flag.
      * @dev Emits a `SaleStopped` event.
      */
-    function stopSale() external onlyDefaultAdminOrBot {
-        saleStopped = true;
+    function stopSale(bool _enabled) external onlyDefaultAdminOrBot {
+        saleStopped = _enabled;
 
-        emit SaleStopped();
+        emit SaleStopped(_enabled);
     }
 
     /**

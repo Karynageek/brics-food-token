@@ -176,7 +176,7 @@ describe('BRICSFoodToken contract', () => {
 
         it('should revert if sale has stopped', async () => {
             /* SETUP */
-            await token.connect(owner).stopSale();
+            await token.connect(owner).stopSale(true);
             const amount = 10;
             const paymentToken = busdMock.address;
 
@@ -253,7 +253,7 @@ describe('BRICSFoodToken contract', () => {
 
         it('should revert if sale has stopped', async () => {
             /* SETUP */
-            await token.connect(owner).stopSale();
+            await token.connect(owner).stopSale(true);
             const amount = 1;
 
             /* ASSERT */
@@ -516,13 +516,30 @@ describe('BRICSFoodToken contract', () => {
             const saleStoppedBefore = await token.saleStopped();
 
             /* EXECUTE */
-            const tx = await token.connect(owner).stopSale();
+            const tx = await token.connect(owner).stopSale(true);
 
             /* ASSERT */
             const saleStoppedAfter = await token.saleStopped();
 
             expect(saleStoppedAfter).to.not.equal(saleStoppedBefore);
             expect(saleStoppedAfter).to.true;
+            await expect(tx).to.emit(token, 'SaleStopped');
+        });
+
+        it('starts sale successfully if default admin role', async () => {
+            /* SETUP */
+            await token.connect(owner).stopSale(true)
+            const saleStoppedBefore = await token.saleStopped();
+            expect(saleStoppedBefore).to.true;
+
+            /* EXECUTE */
+            const tx = await token.connect(owner).stopSale(false);
+
+            /* ASSERT */
+            const saleStoppedAfter = await token.saleStopped();
+
+            expect(saleStoppedAfter).to.not.equal(saleStoppedBefore);
+            expect(saleStoppedAfter).to.false;
             await expect(tx).to.emit(token, 'SaleStopped');
         });
 
@@ -533,7 +550,7 @@ describe('BRICSFoodToken contract', () => {
             const saleStoppedBefore = await token.saleStopped();
 
             /* EXECUTE */
-            const tx = await token.connect(bot).stopSale();
+            const tx = await token.connect(bot).stopSale(true);
 
             /* ASSERT */
             const saleStoppedAfter = await token.saleStopped();
@@ -545,7 +562,7 @@ describe('BRICSFoodToken contract', () => {
 
         it('rejects if not default admin or bot role', async () => {
             /* ASSERT */
-            await expect(token.connect(addr1).stopSale()).to.be.revertedWith('MissingRole()');
+            await expect(token.connect(addr1).stopSale(true)).to.be.revertedWith('MissingRole()');
         });
     });
 
