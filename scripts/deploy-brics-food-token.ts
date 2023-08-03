@@ -18,12 +18,15 @@ async function main() {
     const fundingWallet = '0x131D1697d2cFB060493C14A4e6Fa72892770588E';
     const adminAddress = '0x131D1697d2cFB060493C14A4e6Fa72892770588E';
     const minterAddress = '0x131D1697d2cFB060493C14A4e6Fa72892770588E';
+    const botAddress = '0x131D1697d2cFB060493C14A4e6Fa72892770588E';
 
     const BRICSFoodToken = (await ethers.getContractFactory('BRICSFoodToken')) as BRICSFoodToken__factory;
     token = await BRICSFoodToken.deploy(name, symbol, [usdtContractAddress, usdcContractAddress, busdContractAddress], [usdtPaymentAmount, usdcPaymentAmount, busdPaymentAmount], fundingWallet, adminAddress, minterAddress);
     await token.deployed();
 
-    console.log("BRICSFoodToken deployed to:", token.address);
+    await token.grantRole(await token.BOT_ROLE(), botAddress);
+
+    console.log("CommunicationToken deployed to:", token.address);
 
     await delay(35000);
 

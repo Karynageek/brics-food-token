@@ -218,8 +218,8 @@ contract BRICSFoodToken is ERC20, ERC20Burnable, AccessControl {
         }
         if (hasRole(BOT_ROLE, _msgSender())) {
             if (
-                _newPrice > price + priceUpperLimit ||
-                _newPrice < price - priceLowerLimit
+                _newPrice > priceUpperLimit ||
+                _newPrice < priceLowerLimit
             ) {
                 revert InvalidPrice();
             }
@@ -235,7 +235,7 @@ contract BRICSFoodToken is ERC20, ERC20Burnable, AccessControl {
      * @param _upperLimit The upper limit for the token price.
      *
      * @dev This function can only be called by the default admin role.
-     * @dev The lower limit must be less than the sum of `MIN_TOKEN_PRICE` and the current price.
+     * @dev The lower limit must be greater than the sum of `MIN_TOKEN_PRICE`.
      * @dev The upper limit must be greater than or equal to the lower limit.
      * @dev Reverts with 'InvalidLimit' error if the new price limits do not meet the requirements.
      */
@@ -243,7 +243,7 @@ contract BRICSFoodToken is ERC20, ERC20Burnable, AccessControl {
         uint16 _lowerLimit,
         uint16 _upperLimit
     ) external onlyRole(DEFAULT_ADMIN_ROLE) {
-        if (_lowerLimit >= MIN_TOKEN_PRICE + price) {
+        if (_lowerLimit < MIN_TOKEN_PRICE) {
             revert InvalidLimit();
         }
         if (_upperLimit < _lowerLimit) {

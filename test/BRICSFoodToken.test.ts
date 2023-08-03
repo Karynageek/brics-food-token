@@ -339,11 +339,9 @@ describe('BRICSFoodToken contract', () => {
             const lowerLimit = 2;
             const upperLimit = 20;
 
-            await token.connect(owner).setPrice(30);
             await token.setPriceLimits(lowerLimit, upperLimit);
 
-            const currentPrice = await token.price();
-            const newPrice = currentPrice - lowerLimit;
+            const newPrice = lowerLimit;
 
             /* EXECUTE */
             await token.connect(bot).setPrice(newPrice);
@@ -362,11 +360,9 @@ describe('BRICSFoodToken contract', () => {
             const lowerLimit = 2;
             const upperLimit = 20;
 
-            await token.connect(owner).setPrice(3);
             await token.setPriceLimits(lowerLimit, upperLimit);
 
-            const currentPrice = await token.price();
-            const newPrice = currentPrice + upperLimit;
+            const newPrice = upperLimit;
 
             /* EXECUTE */
             await token.connect(bot).setPrice(newPrice);
@@ -384,11 +380,9 @@ describe('BRICSFoodToken contract', () => {
             const lowerLimit = 2;
             const upperLimit = 20;
 
-            await token.connect(owner).setPrice(3);
             await token.setPriceLimits(lowerLimit, upperLimit);
 
-            const currentPrice = await token.price();
-            const newPrice = currentPrice + upperLimit + 1;
+            const newPrice = upperLimit + 1;
 
             /* ASSERT */
             await expect(token.connect(bot).setPrice(newPrice)).to.be.revertedWith('InvalidPrice()');
@@ -401,15 +395,11 @@ describe('BRICSFoodToken contract', () => {
             const lowerLimit = 10;
             const upperLimit = 20;
 
-            await token.connect(owner).setPrice(30);
             await token.setPriceLimits(lowerLimit, upperLimit);
 
-            const currentPrice = await token.price();
-
-            const newPrice = currentPrice - lowerLimit - 1;
+            const newPrice = lowerLimit - 1;
 
             /* ASSERT */
-            expect(currentPrice).to.greaterThan(newPrice);
             await expect(token.connect(bot).setPrice(newPrice)).to.be.revertedWith('InvalidPrice()');
         });
 
@@ -437,12 +427,14 @@ describe('BRICSFoodToken contract', () => {
         });
 
         it("should set the price limits by the admin", async () => {
+            /* SETUP */
             const lowerLimit = 29;
             const upperLimit = 45;
 
-            await token.connect(owner).setPrice(30);
+            /* EXECUTE */
             await token.setPriceLimits(lowerLimit, upperLimit);
 
+            /* ASSERT */
             const updatedLowerLimit = await token.priceLowerLimit();
             const updatedUpperLimit = await token.priceUpperLimit();
 
@@ -450,26 +442,30 @@ describe('BRICSFoodToken contract', () => {
             expect(updatedUpperLimit).to.equal(upperLimit);
         });
 
-        it("should revert when setting the lower limit above the sum of MIN_TOKEN_PRICE and the current price", async () => {
-            const currentPrice = await token.price();
-            const invalidLowerLimit = currentPrice + 1;
+        it("should revert when setting the lower limit above the sum of MIN_TOKEN_PRICE", async () => {
+            /* SETUP */
+            const upperLimit = await token.MIN_TOKEN_PRICE();
+            const invalidLowerLimit = upperLimit - 1;
 
-            await expect(token.connect(owner).setPriceLimits(invalidLowerLimit, currentPrice)).to.be.revertedWith("InvalidLimit()");
+            /* ASSERT */
+            await expect(token.connect(owner).setPriceLimits(invalidLowerLimit, upperLimit)).to.be.revertedWith("InvalidLimit()");
         });
 
         it("should revert when setting the upper limit below the lower limit", async () => {
+            /* SETUP */
             const lowerLimit = 5;
             const upperLimit = 4;
 
-            await token.connect(owner).setPrice(30);
-
+            /* ASSERT */
             await expect(token.connect(owner).setPriceLimits(lowerLimit, upperLimit)).to.be.revertedWith("InvalidLimit()");
         });
 
         it("should revert when a non-admin tries to set the price limits", async () => {
+            /* SETUP */
             const lowerLimit = 0;
             const upperLimit = 1;
 
+            /* ASSERT */
             await expect(token.connect(addr1).setPriceLimits(lowerLimit, upperLimit)).to.be.revertedWith(
                 `AccessControl: account ${addr1.address.toLowerCase()} is missing role ${await token.DEFAULT_ADMIN_ROLE()}`
             );
