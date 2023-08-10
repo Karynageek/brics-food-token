@@ -90,11 +90,11 @@ describe('BRICSFoodToken contract', () => {
 
         it('should buy tokens by a user if payment token is usdt', async () => {
             /* SETUP */
-            const amount = 10;
+            const amount = parseUnits('10', 18);
             const paymentToken = usdtMock.address;
-            const minted = 1;
-            await token.connect(minter).mint(addr2.address, minted);
+            await token.connect(minter).mint(addr2.address, parseUnits('1', 18));
             const usdtAmount = await token.calculateTotalPrice(amount, paymentToken);
+            const mintedCountBefore = await token.mintedCount();
 
             /* EXECUTE */
             await usdtMock.connect(addr1).mint(addr1.address, usdtAmount);
@@ -109,7 +109,7 @@ describe('BRICSFoodToken contract', () => {
             const addr1BalanceAfter = await usdtMock.balanceOf(addr1.address);
 
             /* ASSERT */
-            expect(await token.mintedCount()).to.equal(amount + minted);
+            expect(await token.mintedCount()).to.equal(amount.add(mintedCountBefore));
             expect(fundingBalanceAfter).to.equal(fundingBalanceBefore.add(usdtAmount));
             expect(addr1BalanceAfter).to.equal(addr1BalanceBefore.sub(usdtAmount));
             expect(await token.balanceOf(addr1.address)).to.equal(amount);
@@ -120,7 +120,7 @@ describe('BRICSFoodToken contract', () => {
 
         it('should buy tokens by a user if payment token is usdc', async () => {
             /* SETUP */
-            const amount = 10;
+            const amount = parseUnits('10', 18);
             const paymentToken = usdcMock.address;
             const usdcAmount = await token.calculateTotalPrice(amount, paymentToken);
 
@@ -148,7 +148,7 @@ describe('BRICSFoodToken contract', () => {
 
         it('should buy tokens by a user if payment token is busd', async () => {
             /* SETUP */
-            const amount = 10;
+            const amount = parseUnits('10', 18);
             const paymentToken = busdMock.address;
             const busdAmount = await token.calculateTotalPrice(amount, paymentToken);
 
@@ -177,7 +177,7 @@ describe('BRICSFoodToken contract', () => {
         it('should revert if sale has stopped', async () => {
             /* SETUP */
             await token.connect(owner).stopSale(true);
-            const amount = 10;
+            const amount = parseUnits('10', 18);
             const paymentToken = busdMock.address;
 
             /* ASSERT */
@@ -189,7 +189,7 @@ describe('BRICSFoodToken contract', () => {
         it('should revert if max mint count is exceeded', async () => {
             /* SETUP */
             await token.connect(minter).mint(addr1.address, await token.MAX_TOTAL_SUPPLY());
-            const amount = 1;
+            const amount = parseUnits('1', 18);
             const paymentToken = busdMock.address;
 
             /* ASSERT */
@@ -211,7 +211,7 @@ describe('BRICSFoodToken contract', () => {
 
         it('should revert if unsupported payment token is used', async () => {
             /* SETUP */
-            const amount = 10;
+            const amount = parseUnits('10', 18);
             const paymentToken = ethers.constants.AddressZero;
 
             /* ASSERT */
@@ -254,7 +254,7 @@ describe('BRICSFoodToken contract', () => {
         it('should revert if sale has stopped', async () => {
             /* SETUP */
             await token.connect(owner).stopSale(true);
-            const amount = 1;
+            const amount = parseUnits('1', 18);
 
             /* ASSERT */
             await expect(token.connect(minter).mint(addr1.address, amount)).to.be.revertedWith(
@@ -274,7 +274,7 @@ describe('BRICSFoodToken contract', () => {
 
         it('rejects if not default minter role', async () => {
             /* SETUP */
-            const amount = 10;
+            const amount = parseUnits('10', 18);
 
             /* ASSERT */
             await expect(token.connect(owner).mint(addr1.address, amount)).to.be.revertedWith(
@@ -291,11 +291,10 @@ describe('BRICSFoodToken contract', () => {
 
         it('should calculate the total price correctly without discount', async () => {
             /* SETUP */
-            const amount = 10;
+            const amount = parseUnits('10', 18);
             const paymentToken = busdMock.address;
-            const basePrice = price;
-            const currentTokenPrice = basePrice * amount;
-            const busdAmount = parseUnits(currentTokenPrice.toString(), await busdMock.decimals());
+
+            const busdAmount = amount.mul(price).mul(ethers.BigNumber.from(10).pow(await busdMock.decimals())).div(ethers.BigNumber.from(10).pow(18));
 
             /* EXECUTE */
             const totalPrice = await token.calculateTotalPrice(amount, paymentToken);
@@ -306,7 +305,7 @@ describe('BRICSFoodToken contract', () => {
 
         it('should revert if payment token is not supported', async () => {
             /* SETUP */
-            const amount = 10;
+            const amount = parseUnits('10', 18);
 
             /* ASSERT */
             await expect(token.calculateTotalPrice(amount, zeroAddress)).to.be.revertedWith('UnsupportedPaymentToken()');

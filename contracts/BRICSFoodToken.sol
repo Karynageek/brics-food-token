@@ -45,31 +45,31 @@ contract BRICSFoodToken is ERC20, ERC20Burnable, AccessControl {
      *
      * @param name_ The name of the token.
      * @param symbol_ The symbol of the token.
-     * @param tokenContractAddresses The addresses of the supported payment tokens.
-     * @param paymentAmounts The corresponding payment amounts for each payment token.
+     * @param tokenContractAddresses_ The addresses of the supported payment tokens.
+     * @param paymentAmounts_ The corresponding payment amounts for each payment token.
      * @param fundingWallet_ The address of the funding wallet.
      * @param admin_ The address of the admin role.
      * @param minter_ The address of the minter role.
      *
-     * @dev The `tokenContractAddresses` and `paymentAmounts` arrays must have the same length.
+     * @dev The `tokenContractAddresses_` and `paymentAmounts_` arrays must have the same length.
      */
     constructor(
         string memory name_,
         string memory symbol_,
-        address[] memory tokenContractAddresses,
-        uint256[] memory paymentAmounts,
+        address[] memory tokenContractAddresses_,
+        uint256[] memory paymentAmounts_,
         address fundingWallet_,
         address admin_,
         address minter_
     ) ERC20(name_, symbol_) {
-        uint256 dataLength = tokenContractAddresses.length;
+        uint256 tokenLength = tokenContractAddresses_.length;
 
-        if (dataLength != paymentAmounts.length) {
+        if (tokenLength != paymentAmounts_.length) {
             revert DataLengthsNotMatch();
         }
 
-        for (uint256 i = 0; i < dataLength; i++) {
-            tokenPaymentAmounts[tokenContractAddresses[i]] = paymentAmounts[i];
+        for (uint256 i = 0; i < tokenLength; i++) {
+            tokenPaymentAmounts[tokenContractAddresses_[i]] = paymentAmounts_[i];
         }
 
         fundingWallet = fundingWallet_;
@@ -219,10 +219,7 @@ contract BRICSFoodToken is ERC20, ERC20Burnable, AccessControl {
             revert InvalidPrice();
         }
         if (hasRole(BOT_ROLE, _msgSender())) {
-            if (
-                _newPrice > priceUpperLimit ||
-                _newPrice < priceLowerLimit
-            ) {
+            if (_newPrice > priceUpperLimit || _newPrice < priceLowerLimit) {
                 revert InvalidPrice();
             }
         }
@@ -278,6 +275,6 @@ contract BRICSFoodToken is ERC20, ERC20Burnable, AccessControl {
             revert UnsupportedPaymentToken();
         }
 
-        return _amount * price * paymentAmount;
+        return (_amount * price * paymentAmount) / 10 ** decimals();
     }
 }

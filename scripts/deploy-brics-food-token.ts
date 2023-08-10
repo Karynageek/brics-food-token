@@ -7,11 +7,11 @@ async function main() {
     const delay = (ms: any) => new Promise((res) => setTimeout(res, ms));
 
     let token: BRICSFoodToken;
-    const name = 'BRICS Food Token ';
+    const name = 'BRICS Food Token';
     const symbol = 'BFT';
-    const usdtContractAddress = '0x337610d27c682E347C9cD60BD4b3b107C9d34dDd';
-    const usdcContractAddress = '0x64544969ed7ebf5f083679233325356ebe738930';
-    const busdContractAddress = '0xed24fc36d5ee211ea25a80239fb8c4cfd80f12ee';
+    const usdtContractAddress = '0x55d398326f99059fF775485246999027B3197955';
+    const usdcContractAddress = '0x8AC76a51cc950d9822D68b83fE1Ad97B32Cd580d';
+    const busdContractAddress = '0xe9e7CEA3DedcA5984780Bafc599bD69ADd087D56';
     const usdtPaymentAmount = parseUnits('1', 18);
     const usdcPaymentAmount = parseUnits('1', 18);
     const busdPaymentAmount = parseUnits('1', 18);
@@ -26,7 +26,7 @@ async function main() {
 
     await token.grantRole(await token.BOT_ROLE(), botAddress);
 
-    console.log("CommunicationToken deployed to:", token.address);
+    console.log("BRICSFoodToken deployed to:", token.address);
 
     await delay(35000);
 
